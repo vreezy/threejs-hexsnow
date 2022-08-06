@@ -6,6 +6,7 @@
    },
    "dependencies": {
       "simplex-noise": "^4.0.0",
+      "stats.js": "^0.17.0",
       "three": "^0.143.0"
    },
    "devDependencies": {

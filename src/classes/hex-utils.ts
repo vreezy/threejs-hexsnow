@@ -1,4 +1,4 @@
-import { BufferGeometry, Color, CylinderGeometry, Mesh, Vector2, MeshStandardMaterial } from 'three';
+import { BufferGeometry, Color, CylinderGeometry, Mesh, Vector2, MeshStandardMaterial, Vector3 } from 'three';
 
 export class HexUtils {
    static tileToPosition(tileX: number, tileY: number) {
