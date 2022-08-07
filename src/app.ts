@@ -8,13 +8,12 @@ import {
    TextureLoader,
    WebGLRenderer,
 } from 'three';
-import { World } from './classes/world';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import { World } from 'components/world';
 import Stats from 'stats.js';
 import GUI from 'lil-gui';
 
 export class App {
-   private textureLoader: TextureLoader;
    private camera: PerspectiveCamera;
    private renderer: WebGLRenderer;
    private controls: OrbitControls;
@@ -42,14 +41,12 @@ export class App {
       this.renderer.shadowMap.enabled = true;
       document.body.appendChild(this.renderer.domElement);
 
-      this.textureLoader = new TextureLoader();
-
       this.controls = new OrbitControls(this.camera, this.renderer.domElement);
       this.controls.target.set(0, 0, 0);
       this.controls.dampingFactor = 0.05;
       this.controls.enableDamping = true;
 
-      this.world = new World(this.scene, this.gui, this.textureLoader);
+      this.world = new World(this.scene, this.gui);
       this.world.generate();
 
       this.stats = new Stats();

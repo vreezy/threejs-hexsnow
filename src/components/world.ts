@@ -13,26 +13,24 @@ import {
    Vector2,
 } from 'three';
 import { createNoise2D, NoiseFunction2D } from 'simplex-noise';
-import { HexUtils } from './hex-utils';
+import { HexUtils } from './hexagon';
 import { MAX_HEIGHT, MAX_PILLARS, MAX_ROCKS, MAX_WORLD_RADIUS } from './constants';
-import groundNormalTexture from '../assets/ground-normal-medium.jpg';
-import groundTexture from '../assets/ground-medium.jpg';
+
 import GUI from 'lil-gui';
+import { Ground } from './ground';
+import { textureLoader } from './loader';
 
 export class World {
    private pillarMaterial: MeshStandardMaterial;
-   private tileMaterial: MeshStandardMaterial;
+   private groundMaterial: MeshStandardMaterial;
 
    private heightMap: NoiseFunction2D;
    private ambientLight: AmbientLight;
    private pointLight: PointLight;
    private pillars: InstancedMesh;
-   private tiles: InstancedMesh;
+   private ground: InstancedMesh;
    private rocks: InstancedMesh;
    private scene: Scene;
-   private gui: GUI;
-
-   private textureLoader: TextureLoader;
 
    private roughness: number;
    private metalness: number;
@@ -41,33 +39,28 @@ export class World {
    private tileCount: number;
    private rockCount: number;
 
-   constructor(_scene: Scene, _gui: GUI, _textureLoader: TextureLoader) {
-      this.textureLoader = _textureLoader;
+   constructor(_scene: Scene, _gui: GUI) {
       this.scene = _scene;
-      this.gui = _gui;
 
-      const tileGeometry = new CylinderGeometry(1, 1, 1, 6, 1, false);
       const rockGeometry = new SphereGeometry(0.15, 10, 10, 0, 6.28, 0, 1.56);
 
       this.metalness = 0.6;
       this.roughness = 0.5;
 
-      this.pillarMaterial = new MeshStandardMaterial({ color: new Color(0x9042f5), flatShading: true });
-      this.tileMaterial = new MeshStandardMaterial({
-         metalness: this.metalness,
-         roughness: this.roughness,
+      this.pillarMaterial = new MeshStandardMaterial({
+         color: new Color(0x9042f5),
          flatShading: true,
       });
       const rockMaterial = new MeshStandardMaterial();
 
-      this.pillars = new InstancedMesh(tileGeometry, this.pillarMaterial, MAX_PILLARS);
-      this.tiles = new InstancedMesh(tileGeometry, this.tileMaterial, 9000);
+      this.pillars = new InstancedMesh(groundGeometry, this.pillarMaterial, MAX_PILLARS);
+      this.ground = Ground.create(this.metalness, this.roughness);
       this.rocks = new InstancedMesh(rockGeometry, rockMaterial, MAX_ROCKS);
 
+      this.ground.receiveShadow = true;
+      this.ground.castShadow = true;
       this.rocks.receiveShadow = true;
-      this.tiles.receiveShadow = true;
       this.pillars.castShadow = true;
-      this.tiles.castShadow = true;
 
       this.heightMap = createNoise2D();
 
@@ -75,25 +68,12 @@ export class World {
       this.rockCount = 0;
       this.tileCount = 0;
 
-      this.load();
-      this.initGui();
-   }
-
-   private async load() {
-      const normalPromise = this.textureLoader.loadAsync(groundNormalTexture);
-      const groundPromise = this.textureLoader.loadAsync(groundTexture);
-
-      Promise.all([normalPromise, groundPromise]).then((values) => {
-         this.tileMaterial.normalMap = values[0];
-         this.tileMaterial.normalScale = new Vector2(0.3, 0.3);
-         this.tileMaterial.map = values[1];
-         this.tileMaterial.needsUpdate = true;
-      });
+      this.initGui(_gui);
    }
 
    public generate() {
       this.scene.add(this.pillars);
-      this.scene.add(this.tiles);
+      this.scene.add(this.ground);
       this.scene.add(this.rocks);
 
       const matrix = new Matrix4();
@@ -121,8 +101,8 @@ export class World {
       this.scene.add(this.pointLight);
 
       this.pillars.instanceMatrix.needsUpdate = true;
+      this.ground.instanceMatrix.needsUpdate = true;
       this.rocks.instanceMatrix.needsUpdate = true;
-      this.tiles.instanceMatrix.needsUpdate = true;
       this.pointLight.shadow.needsUpdate = true;
    }
 
@@ -157,7 +137,7 @@ export class World {
 
          matrix.makeScale(1, height, 1);
          matrix.setPosition(position.x, height * 0.5, position.y);
-         this.tiles.setMatrixAt(count, matrix);
+         this.ground.setMatrixAt(count, matrix);
       }
    }
 
@@ -172,19 +152,17 @@ export class World {
 
    public update() {}
 
-   private initGui() {
-      this.gui
-         .add(this, 'metalness', 0, 1, 0.01)
+   private initGui(gui: GUI) {
+      gui.add(this, 'metalness', 0, 1, 0.01)
          .name('Metalness')
          .onChange((value) => {
-            this.tileMaterial.metalness = value;
+            this.groundMaterial.metalness = value;
          });
 
-      this.gui
-         .add(this, 'roughness', 0, 1, 0.01)
+      gui.add(this, 'roughness', 0, 1, 0.01)
          .name('Roughness')
          .onChange((value) => {
-            this.tileMaterial.roughness = value;
+            this.groundMaterial.roughness = value;
          });
    }
 }
