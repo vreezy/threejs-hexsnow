@@ -15,11 +15,14 @@ import {
 import { createNoise2D, NoiseFunction2D } from 'simplex-noise';
 import { HexUtils } from './hex-utils';
 import { MAX_HEIGHT, MAX_PILLARS, MAX_ROCKS, MAX_WORLD_RADIUS } from './constants';
-import groundTexture from '../assets/ground.jpg';
+import groundNormalTexture from '../assets/ground-normal-medium.jpg';
+import groundTexture from '../assets/ground-medium.jpg';
+import GUI from 'lil-gui';
 
 export class World {
    private pillarMaterial: MeshStandardMaterial;
    private tileMaterial: MeshStandardMaterial;
+
    private heightMap: NoiseFunction2D;
    private ambientLight: AmbientLight;
    private pointLight: PointLight;
@@ -27,28 +30,41 @@ export class World {
    private tiles: InstancedMesh;
    private rocks: InstancedMesh;
    private scene: Scene;
+   private gui: GUI;
 
    private textureLoader: TextureLoader;
+
+   private roughness: number;
+   private metalness: number;
 
    private pillarCount: number;
    private tileCount: number;
    private rockCount: number;
 
-   constructor(_scene: Scene, _textureLoader: TextureLoader) {
+   constructor(_scene: Scene, _gui: GUI, _textureLoader: TextureLoader) {
       this.textureLoader = _textureLoader;
       this.scene = _scene;
+      this.gui = _gui;
 
       const tileGeometry = new CylinderGeometry(1, 1, 1, 6, 1, false);
-      const rockGeometry = new SphereGeometry(0.15, 10, 10);
+      const rockGeometry = new SphereGeometry(0.15, 10, 10, 0, 6.28, 0, 1.56);
+
+      this.metalness = 0.6;
+      this.roughness = 0.5;
 
       this.pillarMaterial = new MeshStandardMaterial({ color: new Color(0x9042f5), flatShading: true });
-      this.tileMaterial = new MeshStandardMaterial({ flatShading: true });
+      this.tileMaterial = new MeshStandardMaterial({
+         metalness: this.metalness,
+         roughness: this.roughness,
+         flatShading: true,
+      });
       const rockMaterial = new MeshStandardMaterial();
 
       this.pillars = new InstancedMesh(tileGeometry, this.pillarMaterial, MAX_PILLARS);
-      this.tiles = new InstancedMesh(tileGeometry, this.tileMaterial, 14000);
+      this.tiles = new InstancedMesh(tileGeometry, this.tileMaterial, 9000);
       this.rocks = new InstancedMesh(rockGeometry, rockMaterial, MAX_ROCKS);
 
+      this.rocks.receiveShadow = true;
       this.tiles.receiveShadow = true;
       this.pillars.castShadow = true;
       this.tiles.castShadow = true;
@@ -60,11 +76,19 @@ export class World {
       this.tileCount = 0;
 
       this.load();
+      this.initGui();
    }
 
    private async load() {
-      this.tileMaterial.map = await this.textureLoader.loadAsync(groundTexture);
-      this.tileMaterial.needsUpdate = true;
+      const normalPromise = this.textureLoader.loadAsync(groundNormalTexture);
+      const groundPromise = this.textureLoader.loadAsync(groundTexture);
+
+      Promise.all([normalPromise, groundPromise]).then((values) => {
+         this.tileMaterial.normalMap = values[0];
+         this.tileMaterial.normalScale = new Vector2(0.3, 0.3);
+         this.tileMaterial.map = values[1];
+         this.tileMaterial.needsUpdate = true;
+      });
    }
 
    public generate() {
@@ -79,18 +103,20 @@ export class World {
          }
       }
 
-      this.ambientLight = new AmbientLight(new Color(0xffffff), 0.2);
+      this.ambientLight = new AmbientLight(new Color(0xeca9f5), 0.1);
       this.scene.add(this.ambientLight);
 
-      this.pointLight = new PointLight(new Color(0xeca9f5).convertSRGBToLinear(), 200, 135);
-      this.pointLight.position.set(25, 50, 0);
+      // this.pointLight = new PointLight(new Color(0xeca9f5).convertSRGBToLinear(), 200, 135);
+      // this.pointLight = new PointLight(new Color(0xeca9f5).convertSRGBToLinear(), 2, 120);
+      this.pointLight = new PointLight(new Color(0xffffff).convertSRGBToLinear(), 1.5, 120);
+      this.pointLight.position.set(25, 65, 0);
+      // this.pointLight.position.set(25, 50, 0);
       this.pointLight.castShadow = true;
       this.pointLight.shadow.mapSize.height = 512;
       this.pointLight.shadow.mapSize.width = 512;
       this.pointLight.shadow.autoUpdate = false;
       this.pointLight.shadow.camera.near = 0.5;
       this.pointLight.shadow.camera.far = 50;
-      // this.pointLight.shadow.bias = 0.0001;
 
       this.scene.add(this.pointLight);
 
@@ -145,4 +171,20 @@ export class World {
    }
 
    public update() {}
+
+   private initGui() {
+      this.gui
+         .add(this, 'metalness', 0, 1, 0.01)
+         .name('Metalness')
+         .onChange((value) => {
+            this.tileMaterial.metalness = value;
+         });
+
+      this.gui
+         .add(this, 'roughness', 0, 1, 0.01)
+         .name('Roughness')
+         .onChange((value) => {
+            this.tileMaterial.roughness = value;
+         });
+   }
 }

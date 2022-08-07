@@ -5,6 +5,7 @@
       "dev": "rollup -c -w"
    },
    "dependencies": {
+      "lil-gui": "^0.17.0",
       "simplex-noise": "^4.0.0",
       "stats.js": "^0.17.0",
       "three": "^0.143.0"

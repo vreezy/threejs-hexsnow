@@ -11,6 +11,7 @@ import {
 import { World } from './classes/world';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import Stats from 'stats.js';
+import GUI from 'lil-gui';
 
 export class App {
    private textureLoader: TextureLoader;
@@ -19,10 +20,12 @@ export class App {
    private controls: OrbitControls;
    private scene: Scene;
    private stats: Stats;
+   private gui: GUI;
 
    private world: World;
 
    constructor() {
+      this.gui = new GUI();
       this.scene = new Scene();
 
       this.camera = new PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 150);
@@ -33,9 +36,9 @@ export class App {
       this.renderer.setSize(window.innerWidth, window.innerHeight);
       this.renderer.setPixelRatio(window.devicePixelRatio);
       this.renderer.toneMapping = ACESFilmicToneMapping;
-      this.renderer.shadowMap.type = PCFSoftShadowMap;
+      // this.renderer.shadowMap.type = PCFSoftShadowMap;
       this.renderer.outputEncoding = sRGBEncoding;
-      this.renderer.physicallyCorrectLights = true;
+      // this.renderer.physicallyCorrectLights = true;
       this.renderer.shadowMap.enabled = true;
       document.body.appendChild(this.renderer.domElement);
 
@@ -46,12 +49,13 @@ export class App {
       this.controls.dampingFactor = 0.05;
       this.controls.enableDamping = true;
 
-      this.world = new World(this.scene, this.textureLoader);
+      this.world = new World(this.scene, this.gui, this.textureLoader);
       this.world.generate();
 
-      window.addEventListener('resize', this.onWindowResize.bind(this), false);
       this.stats = new Stats();
       document.body.appendChild(this.stats.dom);
+
+      window.addEventListener('resize', this.onWindowResize.bind(this), false);
 
       this.render();
    }
@@ -65,8 +69,8 @@ export class App {
    private render() {
       requestAnimationFrame(this.render.bind(this));
       this.stats.begin();
-      this.controls.update();
       this.world.update();
+      this.controls.update();
       this.renderer.render(this.scene, this.camera);
       this.stats.end();
    }
