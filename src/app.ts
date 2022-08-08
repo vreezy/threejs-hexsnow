@@ -1,17 +1,8 @@
 import './styles/styles.sass';
-import {
-   ACESFilmicToneMapping,
-   PCFSoftShadowMap,
-   PerspectiveCamera,
-   Scene,
-   sRGBEncoding,
-   TextureLoader,
-   WebGLRenderer,
-} from 'three';
+import { ACESFilmicToneMapping, PerspectiveCamera, Scene, sRGBEncoding, WebGLRenderer } from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import { World } from 'components/world';
+import { World } from 'content/world';
 import Stats from 'stats.js';
-import GUI from 'lil-gui';
 
 export class App {
    private camera: PerspectiveCamera;
@@ -19,15 +10,14 @@ export class App {
    private controls: OrbitControls;
    private scene: Scene;
    private stats: Stats;
-   private gui: GUI;
 
    private world: World;
 
    constructor() {
-      this.gui = new GUI();
       this.scene = new Scene();
 
-      this.camera = new PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 150);
+      // this.camera = new PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 150);
+      this.camera = new PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 1000);
       this.camera.position.set(-17, 31, 33);
 
       this.renderer = new WebGLRenderer({ antialias: true });
@@ -35,9 +25,7 @@ export class App {
       this.renderer.setSize(window.innerWidth, window.innerHeight);
       this.renderer.setPixelRatio(window.devicePixelRatio);
       this.renderer.toneMapping = ACESFilmicToneMapping;
-      // this.renderer.shadowMap.type = PCFSoftShadowMap;
       this.renderer.outputEncoding = sRGBEncoding;
-      // this.renderer.physicallyCorrectLights = true;
       this.renderer.shadowMap.enabled = true;
       document.body.appendChild(this.renderer.domElement);
 
@@ -46,7 +34,7 @@ export class App {
       this.controls.dampingFactor = 0.05;
       this.controls.enableDamping = true;
 
-      this.world = new World(this.scene, this.gui);
+      this.world = new World(this.scene);
       this.world.generate();
 
       this.stats = new Stats();
