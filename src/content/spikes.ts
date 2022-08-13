@@ -30,7 +30,7 @@ export class Spikes {
    }
 
    private createGeometry() {
-      return new ConeGeometry(0.15, 1, 6, 1);
+      return new ConeGeometry(0.15, 1.5, 4, 1);
    }
 
    private createMesh(geometry: ConeGeometry, material: MeshStandardMaterial) {
@@ -39,7 +39,8 @@ export class Spikes {
 
    private createMaterial() {
       const material = new MeshStandardMaterial({
-         color: new Color(0xff0000),
+         emissive: new Color(0x5c5042),
+         color: new Color(0x5c5042),
          flatShading: true,
       });
 

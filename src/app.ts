@@ -16,8 +16,7 @@ export class App {
    constructor() {
       this.scene = new Scene();
 
-      // this.camera = new PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 150);
-      this.camera = new PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 1000);
+      this.camera = new PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.5, 1000);
       this.camera.position.set(-17, 31, 33);
 
       this.renderer = new WebGLRenderer({ antialias: true });

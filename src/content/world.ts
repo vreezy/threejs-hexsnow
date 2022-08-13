@@ -1,40 +1,21 @@
-import {
-   AmbientLight,
-   Clock,
-   Color,
-   CylinderGeometry,
-   InstancedMesh,
-   Matrix4,
-   Mesh,
-   MeshStandardMaterial,
-   PointLight,
-   Scene,
-   SphereGeometry,
-   TextureLoader,
-   Vector2,
-} from 'three';
+import { AmbientLight, Color, Matrix4, PointLight, Scene, Vector2 } from 'three';
 import { createNoise2D, NoiseFunction2D } from 'simplex-noise';
-import { Hexagon } from './hexagon';
-import { MAX_HEIGHT, MAX_PILLARS, MAX_ROCKS, MAX_SPIKES, MAX_WORLD_RADIUS } from '../utils/constants';
 
-import GUI, { ColorController } from 'lil-gui';
-import { Ground } from './ground';
-import { textureLoader } from '../utils/texture-loader';
-import { gui } from '../utils/gui';
-import { Pillar } from './pillars';
-import { Rocks } from './rocks';
-import { Spikes } from './spikes';
+import { MAX_HEIGHT, MAX_PILLARS, MAX_SPIKES, MAX_WORLD_RADIUS } from '../utils/constants';
+import { Hexagon, Pillar, Ground, Spikes, Rocks, Grass, Sand } from 'content';
 
 export class World {
-   private pillars: Pillar;
-   private ground: Ground;
-   private spikes: Spikes;
-   private rocks: Rocks;
-
    private heightMap: NoiseFunction2D;
    private ambientLight: AmbientLight;
    private pointLight: PointLight;
    private scene: Scene;
+
+   private pillars: Pillar;
+   private ground: Ground;
+   private spikes: Spikes;
+   private grass: Grass;
+   private rocks: Rocks;
+   private sand: Sand;
 
    constructor(_scene: Scene) {
       this.scene = _scene;
@@ -42,6 +23,8 @@ export class World {
       const hexGeometry = Hexagon.createGeometry();
       this.pillars = new Pillar(hexGeometry);
       this.ground = new Ground(hexGeometry);
+      this.grass = new Grass(hexGeometry);
+      this.sand = new Sand(hexGeometry);
       this.spikes = new Spikes();
       this.rocks = new Rocks();
 
@@ -52,7 +35,9 @@ export class World {
       this.scene.add(this.pillars.mesh);
       this.scene.add(this.ground.mesh);
       this.scene.add(this.spikes.mesh);
+      this.scene.add(this.grass.mesh);
       this.scene.add(this.rocks.mesh);
+      this.scene.add(this.sand.mesh);
 
       this.createTiles();
       this.createLights();
@@ -61,6 +46,8 @@ export class World {
       this.ground.mesh.instanceMatrix.needsUpdate = true;
       this.spikes.mesh.instanceMatrix.needsUpdate = true;
       this.rocks.mesh.instanceMatrix.needsUpdate = true;
+      this.grass.mesh.instanceMatrix.needsUpdate = true;
+      this.sand.mesh.instanceMatrix.needsUpdate = true;
       this.pointLight.shadow.needsUpdate = true;
    }
 
@@ -79,10 +66,8 @@ export class World {
             const position = Hexagon.getPosition(x, y);
             if (position.length() < MAX_WORLD_RADIUS) {
                let height = (this.heightMap(x * 0.075, y * 0.075) + 0.75) * 0.6;
-               if (height > 0.1) {
-                  height = Math.pow(height, 2.5) * MAX_HEIGHT + 0.25;
-                  this.createTile(height, position, matrix);
-               }
+               height = Math.pow(height, 2.5) * MAX_HEIGHT + 0.25;
+               this.createTile(height, position, matrix);
             }
          } while (yPositive < 100 || yNegative < 100);
       } while (xPositive < 100 || xNegative < 100);
@@ -93,15 +78,18 @@ export class World {
          return;
       } else if (height > MAX_HEIGHT * 0.895 && MAX_PILLARS > this.pillars.count) {
          this.pillars.createTile(height, position, matrix);
-      } else {
+      } else if (height > MAX_HEIGHT * 0.5) {
          this.ground.createTile(height, position, matrix);
-
-         if (Math.random() > 0.985) {
-            this.rocks.createRock(height, position, matrix);
-         }
          if (Math.random() > 0.92 && MAX_SPIKES > this.spikes.count) {
             this.spikes.createSpike(height, position, matrix);
          }
+      } else if (height > MAX_HEIGHT * 0.3) {
+         this.grass.createTile(height, position, matrix);
+         if (Math.random() > 0.985) {
+            this.rocks.createRock(height, position, matrix);
+         }
+      } else {
+         this.sand.createTile(height, position, matrix);
       }
    }
 

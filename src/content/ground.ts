@@ -1,6 +1,6 @@
 import { CylinderGeometry, InstancedMesh, Matrix4, MeshStandardMaterial, Vector2 } from 'three';
-import groundNormalTexture from '../assets/ground-normal.jpg';
-import groundTexture from '../assets/ground.jpg';
+import groundNormalTexture from '../assets/ground/ground-normal.jpg';
+import groundTexture from '../assets/ground/ground.jpg';
 import { textureLoader } from 'utils/texture-loader';
 import { gui } from '../utils/gui';
 
@@ -12,8 +12,8 @@ export class Ground {
    count: number;
 
    constructor(hexGeometry: CylinderGeometry) {
-      this.metalness = 0.6;
-      this.roughness = 0.5;
+      this.metalness = 0.7;
+      this.roughness = 0.0;
       this.count = 0;
 
       this.material = this.createMaterial(this.metalness, this.roughness);
@@ -55,14 +55,13 @@ export class Ground {
    }
 
    private initGui() {
-      const instance = gui.getInstance();
-
-      instance
+      const folder = gui.getInstance().addFolder('Ground');
+      folder
          .add(this, 'metalness', 0, 1, 0.01)
          .onChange((value) => (this.material.metalness = value))
          .name('Metalness');
 
-      instance
+      folder
          .add(this, 'roughness', 0, 1, 0.01)
          .onChange((value) => (this.material.roughness = value))
          .name('Roughness');
