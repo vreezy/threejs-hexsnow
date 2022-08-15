@@ -1,6 +1,7 @@
 import './styles/styles.sass';
 import { ACESFilmicToneMapping, PerspectiveCamera, Scene, sRGBEncoding, WebGLRenderer } from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import { isMobile } from 'utils/constants';
 import { World } from 'content/world';
 import Stats from 'stats.js';
 
@@ -16,7 +17,12 @@ export class App {
    constructor() {
       this.scene = new Scene();
 
-      this.camera = new PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.5, 1000);
+      this.camera = new PerspectiveCamera(
+         isMobile ? 35 : 45,
+         window.innerWidth / window.innerHeight,
+         0.5,
+         isMobile ? 300 : 1000
+      );
       this.camera.position.set(-17, 31, 33);
 
       this.renderer = new WebGLRenderer({ antialias: true });
@@ -40,7 +46,6 @@ export class App {
       document.body.appendChild(this.stats.dom);
 
       window.addEventListener('resize', this.onWindowResize.bind(this), false);
-
       this.render();
    }
 

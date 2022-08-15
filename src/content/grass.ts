@@ -3,6 +3,7 @@ import grassNormalTexture from '../assets/grass/grass-normal.jpg';
 import grassTexture from '../assets/grass/grass.jpg';
 import { textureLoader } from 'utils/texture-loader';
 import { gui } from '../utils/gui';
+import { MAX_GRASS } from 'utils/constants';
 
 export class Grass {
    material: MeshStandardMaterial;
@@ -31,7 +32,7 @@ export class Grass {
    }
 
    private createMesh(hexGeometry: CylinderGeometry, material: MeshStandardMaterial) {
-      return new InstancedMesh(hexGeometry, material, 5000);
+      return new InstancedMesh(hexGeometry, material, MAX_GRASS);
    }
 
    private createMaterial(metalness: number, roughness: number) {

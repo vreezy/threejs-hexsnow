@@ -3,6 +3,7 @@ import groundNormalTexture from '../assets/ground/ground-normal.jpg';
 import groundTexture from '../assets/ground/ground.jpg';
 import { textureLoader } from 'utils/texture-loader';
 import { gui } from '../utils/gui';
+import { MAX_GROUND, MAX_WORLD_RADIUS } from 'utils/constants';
 
 export class Ground {
    material: MeshStandardMaterial;
@@ -31,7 +32,7 @@ export class Ground {
    }
 
    private createMesh(hexGeometry: CylinderGeometry, material: MeshStandardMaterial) {
-      return new InstancedMesh(hexGeometry, material, 9500);
+      return new InstancedMesh(hexGeometry, material, MAX_GROUND);
    }
 
    private createMaterial(metalness: number, roughness: number) {

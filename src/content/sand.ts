@@ -3,6 +3,7 @@ import sandNormalTexture from '../assets/sand/sand-normal.jpg';
 import sandTexture from '../assets/sand/sand.jpg';
 import { textureLoader } from 'utils/texture-loader';
 import { gui } from '../utils/gui';
+import { MAX_SAND } from 'utils/constants';
 
 export class Sand {
    material: MeshStandardMaterial;
@@ -31,7 +32,7 @@ export class Sand {
    }
 
    private createMesh(hexGeometry: CylinderGeometry, material: MeshStandardMaterial) {
-      return new InstancedMesh(hexGeometry, material, 9500);
+      return new InstancedMesh(hexGeometry, material, MAX_SAND);
    }
 
    private createMaterial(metalness: number, roughness: number) {
