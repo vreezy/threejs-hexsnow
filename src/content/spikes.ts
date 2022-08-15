@@ -1,6 +1,6 @@
 import { Color, ConeGeometry, InstancedMesh, Matrix4, MeshStandardMaterial, Vector2 } from 'three';
 
-import { MAX_SPIKES } from '../utils/constants';
+import { isMobile, MAX_SPIKES } from '../utils/constants';
 
 export class Spikes {
    material: MeshStandardMaterial;
@@ -14,7 +14,9 @@ export class Spikes {
       this.material = this.createMaterial();
       this.geometry = this.createGeometry();
       this.mesh = this.createMesh(this.geometry, this.material);
-      this.mesh.receiveShadow = true;
+      if (isMobile) {
+         this.mesh.receiveShadow = true;
+      }
 
       this.initGui();
    }

@@ -3,7 +3,7 @@ import grassNormalTexture from '../assets/grass/grass-normal.jpg';
 import grassTexture from '../assets/grass/grass.jpg';
 import { textureLoader } from 'utils/texture-loader';
 import { gui } from '../utils/gui';
-import { MAX_GRASS } from 'utils/constants';
+import { MAX_GRASS, isMobile } from 'utils/constants';
 
 export class Grass {
    material: MeshStandardMaterial;
@@ -19,8 +19,10 @@ export class Grass {
 
       this.material = this.createMaterial(this.metalness, this.roughness);
       this.mesh = this.createMesh(hexGeometry, this.material);
-      this.mesh.receiveShadow = true;
-      this.mesh.castShadow = true;
+      if (isMobile) {
+         this.mesh.receiveShadow = true;
+         this.mesh.castShadow = true;
+      }
 
       this.initGui();
    }
@@ -42,14 +44,19 @@ export class Grass {
          flatShading: true,
       });
 
-      Promise.all([textureLoader.loadAsync(grassNormalTexture), textureLoader.loadAsync(grassTexture)]).then(
-         (values) => {
+      const textures = [textureLoader.loadAsync(grassTexture)];
+      if (!isMobile) {
+         textures.push(textureLoader.loadAsync(grassNormalTexture));
+      }
+
+      Promise.all(textures).then((values) => {
+         material.map = values[0];
+         if (!isMobile) {
             material.normalScale = new Vector2(0.3, 0.3);
-            material.normalMap = values[0];
-            material.map = values[1];
-            material.needsUpdate = true;
+            material.normalMap = values[1];
          }
-      );
+         material.needsUpdate = true;
+      });
 
       return material;
    }

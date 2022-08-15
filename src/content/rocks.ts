@@ -1,6 +1,6 @@
 import { InstancedMesh, Matrix4, MeshStandardMaterial, SphereGeometry, Vector2 } from 'three';
 
-import { MAX_ROCKS } from '../utils/constants';
+import { isMobile, MAX_ROCKS } from '../utils/constants';
 
 export class Rocks {
    material: MeshStandardMaterial;
@@ -14,7 +14,9 @@ export class Rocks {
       this.material = this.createMaterial();
       this.geometry = this.createGeometry();
       this.mesh = this.createMesh(this.geometry, this.material);
-      this.mesh.receiveShadow = true;
+      if (isMobile) {
+         this.mesh.receiveShadow = true;
+      }
 
       this.initGui();
    }

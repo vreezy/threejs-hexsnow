@@ -1,6 +1,6 @@
 import { Color, CylinderGeometry, InstancedMesh, Matrix4, MeshStandardMaterial, Vector2 } from 'three';
 
-import { MAX_PILLARS } from '../utils/constants';
+import { isMobile, MAX_PILLARS } from '../utils/constants';
 
 export class Pillar {
    material: MeshStandardMaterial;
@@ -12,7 +12,9 @@ export class Pillar {
 
       this.material = this.createMaterial();
       this.mesh = this.createMesh(hexGeometry, this.material);
-      this.mesh.castShadow = true;
+      if (isMobile) {
+         this.mesh.castShadow = true;
+      }
 
       this.initGui();
    }

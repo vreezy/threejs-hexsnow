@@ -1,9 +1,9 @@
-import { CylinderGeometry, InstancedMesh, Matrix4, MeshStandardMaterial, Vector2 } from 'three';
+import { CylinderGeometry, InstancedMesh, Matrix4, MeshStandardMaterial, Texture, Vector2 } from 'three';
 import sandNormalTexture from '../assets/sand/sand-normal.jpg';
 import sandTexture from '../assets/sand/sand.jpg';
 import { textureLoader } from 'utils/texture-loader';
 import { gui } from '../utils/gui';
-import { MAX_SAND } from 'utils/constants';
+import { isMobile, MAX_SAND } from 'utils/constants';
 
 export class Sand {
    material: MeshStandardMaterial;
@@ -19,8 +19,9 @@ export class Sand {
 
       this.material = this.createMaterial(this.metalness, this.roughness);
       this.mesh = this.createMesh(hexGeometry, this.material);
-      this.mesh.receiveShadow = true;
-      this.mesh.castShadow = true;
+      if (!isMobile) {
+         this.mesh.receiveShadow = true;
+      }
 
       this.initGui();
    }
@@ -42,14 +43,18 @@ export class Sand {
          flatShading: true,
       });
 
-      Promise.all([textureLoader.loadAsync(sandNormalTexture), textureLoader.loadAsync(sandTexture)]).then(
-         (values) => {
-            // material.normalScale = new Vector2(5, 5);
-            material.normalMap = values[0];
-            material.map = values[1];
-            material.needsUpdate = true;
+      const textures = [textureLoader.loadAsync(sandTexture)];
+      if (!isMobile) {
+         textures.push(textureLoader.loadAsync(sandNormalTexture));
+      }
+
+      Promise.all(textures).then((values) => {
+         material.map = values[0];
+         if (!isMobile) {
+            material.normalMap = values[1];
          }
-      );
+         material.needsUpdate = true;
+      });
 
       return material;
    }

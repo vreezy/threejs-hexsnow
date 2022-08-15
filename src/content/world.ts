@@ -1,7 +1,7 @@
 import { AmbientLight, Color, Matrix4, PointLight, Scene, Vector2 } from 'three';
 import { createNoise2D, NoiseFunction2D } from 'simplex-noise';
 
-import { MAX_HEIGHT, MAX_PILLARS, MAX_SPIKES, MAX_WORLD_RADIUS } from '../utils/constants';
+import { isMobile, MAX_HEIGHT, MAX_PILLARS, MAX_SPIKES, MAX_WORLD_RADIUS } from '../utils/constants';
 import { Hexagon, Pillar, Ground, Spikes, Rocks, Grass, Sand } from 'content';
 
 export class World {
@@ -99,12 +99,15 @@ export class World {
 
       this.pointLight = new PointLight(new Color(0xffffff).convertSRGBToLinear(), 1.5, 120);
       this.pointLight.position.set(25, 65, 0);
-      this.pointLight.castShadow = true;
-      this.pointLight.shadow.mapSize.height = 512;
-      this.pointLight.shadow.mapSize.width = 512;
-      this.pointLight.shadow.autoUpdate = false;
-      this.pointLight.shadow.camera.near = 0.5;
-      this.pointLight.shadow.camera.far = 50;
+
+      if (!isMobile) {
+         this.pointLight.castShadow = true;
+         this.pointLight.shadow.mapSize.height = 512;
+         this.pointLight.shadow.mapSize.width = 512;
+         this.pointLight.shadow.autoUpdate = false;
+         this.pointLight.shadow.camera.near = 0.5;
+         this.pointLight.shadow.camera.far = 50;
+      }
 
       this.scene.add(this.pointLight);
    }

@@ -3,7 +3,7 @@ import groundNormalTexture from '../assets/ground/ground-normal.jpg';
 import groundTexture from '../assets/ground/ground.jpg';
 import { textureLoader } from 'utils/texture-loader';
 import { gui } from '../utils/gui';
-import { MAX_GROUND, MAX_WORLD_RADIUS } from 'utils/constants';
+import { isMobile, MAX_GROUND, MAX_WORLD_RADIUS } from 'utils/constants';
 
 export class Ground {
    material: MeshStandardMaterial;
@@ -19,8 +19,10 @@ export class Ground {
 
       this.material = this.createMaterial(this.metalness, this.roughness);
       this.mesh = this.createMesh(hexGeometry, this.material);
-      this.mesh.receiveShadow = true;
-      this.mesh.castShadow = true;
+      if (isMobile) {
+         this.mesh.receiveShadow = true;
+         this.mesh.castShadow = true;
+      }
 
       this.initGui();
    }
@@ -42,13 +44,16 @@ export class Ground {
          flatShading: true,
       });
 
-      Promise.all([
-         textureLoader.loadAsync(groundNormalTexture),
-         textureLoader.loadAsync(groundTexture),
-      ]).then((values) => {
-         material.normalScale = new Vector2(0.3, 0.3);
-         material.normalMap = values[0];
-         material.map = values[1];
+      const textures = [textureLoader.loadAsync(groundTexture)];
+      if (!isMobile) {
+         textures.push(textureLoader.loadAsync(groundNormalTexture));
+      }
+
+      Promise.all(textures).then((values) => {
+         material.map = values[0];
+         if (!isMobile) {
+            material.normalMap = values[1];
+         }
          material.needsUpdate = true;
       });
 
