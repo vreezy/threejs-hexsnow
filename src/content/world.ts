@@ -1,8 +1,25 @@
-import { AmbientLight, Color, Matrix4, PointLight, Scene, Vector2 } from 'three';
+import {
+   AmbientLight,
+   Color,
+   DoubleSide,
+   Matrix4,
+   Mesh,
+   MeshBasicMaterial,
+   MeshNormalMaterial,
+   PlaneGeometry,
+   PointLight,
+   Scene,
+   ShaderMaterial,
+   Vector2,
+} from 'three';
 import { createNoise2D, NoiseFunction2D } from 'simplex-noise';
 
+import fragmentShader from '../shaders/fragment.glsl';
+import vertexShader from '../shaders/vertex.glsl';
+
 import { isMobile, MAX_HEIGHT, MAX_PILLARS, MAX_SPIKES, MAX_WORLD_RADIUS } from '../utils/constants';
-import { Hexagon, Pillar, Ground, Spikes, Rocks, Grass, Sand } from 'content';
+import { Hexagon, Pillar, Metal, Spikes, Pebbles, Rock, Ground } from 'content';
+import { textureLoader } from 'utils';
 
 export class World {
    private heightMap: NoiseFunction2D;
@@ -10,12 +27,14 @@ export class World {
    private pointLight: PointLight;
    private scene: Scene;
 
+   private shaderMaterial: ShaderMaterial;
+
    private pillars: Pillar;
    private ground: Ground;
+   private pebbles: Pebbles;
    private spikes: Spikes;
-   private grass: Grass;
-   private rocks: Rocks;
-   private sand: Sand;
+   private metal: Metal;
+   private rock: Rock;
 
    constructor(_scene: Scene) {
       this.scene = _scene;
@@ -23,31 +42,54 @@ export class World {
       const hexGeometry = Hexagon.createGeometry();
       this.pillars = new Pillar(hexGeometry);
       this.ground = new Ground(hexGeometry);
-      this.grass = new Grass(hexGeometry);
-      this.sand = new Sand(hexGeometry);
+      this.metal = new Metal(hexGeometry);
+      this.rock = new Rock(hexGeometry);
+      this.pebbles = new Pebbles();
       this.spikes = new Spikes();
-      this.rocks = new Rocks();
 
       this.heightMap = createNoise2D();
    }
 
    public generate() {
+      // this.shaderMaterial = new ShaderMaterial({
+      //    vertexShader: vertexShader,
+      //    fragmentShader: fragmentShader,
+      //    uniforms: {
+      //       uColor: { value: new Color(0xff0000) },
+      //       uTime: { value: 0 },
+      //    },
+      // });
+
+      // const planeGeometry = new PlaneGeometry(10, 10);
+      // const plane = new Mesh(planeGeometry, this.shaderMaterial);
+      // plane.rotation.set(-Math.PI * 0.5, 0, 0);
+      // plane.position.set(-5, 0, 0);
+      // this.scene.add(plane);
+
+      // const hexGeometry = Hexagon.createGeometry();
+      // const hexagon = new Mesh(hexGeometry, this.shaderMaterial);
+      // hexagon.rotation.set(0, Math.PI * 0.5, 0);
+      // hexagon.position.set(5, 0, 0);
+      // hexagon.scale.set(5, 0.5, 5);
+      // this.scene.add(hexagon);
+      // return;
+
       this.scene.add(this.pillars.mesh);
       this.scene.add(this.ground.mesh);
+      this.scene.add(this.metal.mesh);
+      this.scene.add(this.rock.mesh);
       this.scene.add(this.spikes.mesh);
-      this.scene.add(this.grass.mesh);
-      this.scene.add(this.rocks.mesh);
-      this.scene.add(this.sand.mesh);
+      this.scene.add(this.pebbles.mesh);
 
       this.createTiles();
       this.createLights();
 
       this.pillars.mesh.instanceMatrix.needsUpdate = true;
       this.ground.mesh.instanceMatrix.needsUpdate = true;
+      this.metal.mesh.instanceMatrix.needsUpdate = true;
+      this.rock.mesh.instanceMatrix.needsUpdate = true;
+      this.pebbles.mesh.instanceMatrix.needsUpdate = true;
       this.spikes.mesh.instanceMatrix.needsUpdate = true;
-      this.rocks.mesh.instanceMatrix.needsUpdate = true;
-      this.grass.mesh.instanceMatrix.needsUpdate = true;
-      this.sand.mesh.instanceMatrix.needsUpdate = true;
       this.pointLight.shadow.needsUpdate = true;
    }
 
@@ -79,17 +121,17 @@ export class World {
       } else if (height > MAX_HEIGHT * 0.895 && MAX_PILLARS > this.pillars.count) {
          this.pillars.createTile(height, position, matrix);
       } else if (height > MAX_HEIGHT * 0.5) {
-         this.ground.createTile(height, position, matrix);
+         this.metal.createTile(height, position, matrix);
          if (Math.random() > 0.92 && MAX_SPIKES > this.spikes.count) {
             this.spikes.createSpike(height, position, matrix);
          }
       } else if (height > MAX_HEIGHT * 0.3) {
-         this.grass.createTile(height, position, matrix);
+         this.rock.createTile(height, position, matrix);
          if (Math.random() > 0.985) {
-            this.rocks.createRock(height, position, matrix);
+            this.pebbles.createRock(height, position, matrix);
          }
       } else {
-         this.sand.createTile(height, position, matrix);
+         this.ground.createTile(height, position, matrix);
       }
    }
 
@@ -99,7 +141,6 @@ export class World {
 
       this.pointLight = new PointLight(new Color(0xffffff).convertSRGBToLinear(), 1.5, 120);
       this.pointLight.position.set(25, 65, 0);
-
       if (!isMobile) {
          this.pointLight.castShadow = true;
          this.pointLight.shadow.mapSize.height = 512;
@@ -112,7 +153,9 @@ export class World {
       this.scene.add(this.pointLight);
    }
 
-   public update() {}
+   public update(time: number) {
+      // this.shaderMaterial.uniforms.uTime.value = time;
+   }
 
    private initGui() {}
 }

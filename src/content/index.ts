@@ -1,9 +1,9 @@
+import { Pillar } from './tiles/pillars';
+import { Ground } from './tiles/ground';
+import { Metal } from './tiles/metal';
+import { Rock } from './tiles/rock';
 import { Hexagon } from './hexagon';
-import { Pillar } from './pillars';
-import { Ground } from './ground';
+import { Pebbles } from './pebbles';
 import { Spikes } from './spikes';
-import { Grass } from './grass';
-import { Rocks } from './rocks';
-import { Sand } from './sand';
 
-export { Hexagon, Pillar, Ground, Spikes, Rocks, Sand, Grass };
+export { Hexagon, Pillar, Pebbles, Metal, Spikes, Rock, Ground };

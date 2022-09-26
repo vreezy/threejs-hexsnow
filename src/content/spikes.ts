@@ -14,7 +14,7 @@ export class Spikes {
       this.material = this.createMaterial();
       this.geometry = this.createGeometry();
       this.mesh = this.createMesh(this.geometry, this.material);
-      if (isMobile) {
+      if (!isMobile) {
          this.mesh.receiveShadow = true;
       }
 
@@ -41,8 +41,8 @@ export class Spikes {
 
    private createMaterial() {
       const material = new MeshStandardMaterial({
-         emissive: new Color(0x5c5042),
-         color: new Color(0x5c5042),
+         emissive: new Color(0x9042f5),
+         color: new Color(0x9042f5),
          flatShading: true,
       });
 

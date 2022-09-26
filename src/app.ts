@@ -1,5 +1,5 @@
 import './styles/styles.sass';
-import { ACESFilmicToneMapping, PerspectiveCamera, Scene, sRGBEncoding, WebGLRenderer } from 'three';
+import { ACESFilmicToneMapping, Clock, PerspectiveCamera, Scene, sRGBEncoding, WebGLRenderer } from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { isMobile } from 'utils/constants';
 import { World } from 'content/world';
@@ -10,6 +10,7 @@ export class App {
    private renderer: WebGLRenderer;
    private controls: OrbitControls;
    private scene: Scene;
+   private clock: Clock;
    private stats: Stats;
 
    private world: World;
@@ -17,12 +18,9 @@ export class App {
    constructor() {
       this.scene = new Scene();
 
-      this.camera = new PerspectiveCamera(
-         isMobile ? 35 : 45,
-         window.innerWidth / window.innerHeight,
-         0.5,
-         isMobile ? 300 : 1000
-      );
+      const aspectRatio = window.innerWidth / window.innerHeight;
+      this.camera = new PerspectiveCamera(45, aspectRatio, 0.5, isMobile ? 300 : 1000);
+      // this.camera.position.set(0, 20, 0);
       this.camera.position.set(-17, 31, 33);
 
       this.renderer = new WebGLRenderer({ antialias: true });
@@ -46,6 +44,8 @@ export class App {
       document.body.appendChild(this.stats.dom);
 
       window.addEventListener('resize', this.onWindowResize.bind(this), false);
+
+      this.clock = new Clock();
       this.render();
    }
 
@@ -57,8 +57,9 @@ export class App {
 
    private render() {
       requestAnimationFrame(this.render.bind(this));
+      const time = this.clock.getElapsedTime();
       this.stats.begin();
-      this.world.update();
+      this.world.update(time);
       this.controls.update();
       this.renderer.render(this.scene, this.camera);
       this.stats.end();
