@@ -18,6 +18,7 @@ import { Hexagon, HexagonType } from './hexagon';
 import { Skybox } from './skybox';
 import { Ice } from './ice';
 import { Trees } from './trees';
+import isMobile from 'is-mobile';
 
 export class World {
    private camera: PerspectiveCamera;
@@ -123,8 +124,8 @@ export class World {
 
    private createFog() {
       this.fog = new Fog(new Color(0xffffff));
-      this.fog.near = 100;
-      this.fog.far = 400;
+      this.fog.near = isMobile ? 80 : 100;
+      this.fog.far = isMobile ? 200 : 400;
       this.scene.fog = this.fog;
    }
 

@@ -13,7 +13,7 @@ import iceTexture from '../assets/snowflake.png';
 
 import { gui, textureLoader } from 'utils';
 import { Spline } from 'utils/spline';
-import { MAX_WORLD_RADIUS } from 'utils/constants';
+import { isMobile, MAX_WORLD_RADIUS } from 'utils/constants';
 
 const vertexShader = /*glsl*/ `
    attribute vec4 colour;
@@ -192,6 +192,7 @@ export class Particles {
    }
 
    private createMaterial() {
+      const pointSize = isMobile ? 60 : 100.0;
       this.uniforms = {
          uEmissiveColour: { value: new Color(0x1a9cff) },
          uColour: { value: new Color(0xffffff) },
@@ -199,7 +200,7 @@ export class Particles {
          uTexture: { value: new Texture() },
          uTime: { value: 0 },
          uPointMultiplier: {
-            value: window.innerHeight / (2.0 * Math.tan((0.5 * 100.0 * Math.PI) / 180.0)),
+            value: window.innerHeight / (2.0 * Math.tan((0.5 * pointSize * Math.PI) / 180.0)),
          },
       };
 
