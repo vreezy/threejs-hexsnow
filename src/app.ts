@@ -1,12 +1,12 @@
 import * as THREE from 'three';
 import './styles/styles.scss';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import { Clock, PerspectiveCamera, Scene, WebGLRenderer } from 'three';
+import { Clock, LinearMipMapLinearFilter, PerspectiveCamera, Scene, WebGLRenderer } from 'three';
 import { createControls } from 'utils/controls';
 import { isMobile } from 'utils/constants';
 import { debugGui } from 'utils';
 import { World } from 'content';
-import UI from './content/ui.html';
+// import UI from './content/ui.html';
 import { initAudio } from 'content/audio';
 
 export class App {
@@ -18,7 +18,8 @@ export class App {
    private world: World;
 
    constructor() {
-      this.renderer = new THREE.WebGLRenderer({ antialias: true });
+      const canvas = document.querySelector('.webgl-canvas');
+      this.renderer = new THREE.WebGLRenderer({ antialias: true, canvas: canvas });
       this.scene = new THREE.Scene();
 
       const farPlane = isMobile ? 400 : 1000;
@@ -55,9 +56,9 @@ export class App {
    }
 
    private initUI() {
-      const uiElement = document.createElement('div');
-      uiElement.innerHTML = UI;
-      document.body.appendChild(uiElement);
+      // const uiElement = document.createElement('div');
+      // uiElement.innerHTML = UI;
+      // document.body.appendChild(uiElement);
    }
 
    private initDebugUI() {

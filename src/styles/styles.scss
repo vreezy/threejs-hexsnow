@@ -10,6 +10,13 @@ body {
    margin: 0;
 }
 
+canvas {
+   position: fixed;
+   outline: none;
+   left: 0;
+   top: 0;
+}
+
 img {
    pointer-events: none;
    max-height: 40px;
