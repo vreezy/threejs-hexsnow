@@ -26,15 +26,18 @@ export default {
       scss({ insert: true }),
       html({ title: 'App', fileName: 'index.html' }),
       typescript({ module: 'ESNext' }),
-      url({ fileName: 'assets/[name][extname]' }),
-      string({ include: '**/*.glsl' }),
+      url({
+         fileName: 'assets/[name][extname]',
+         include: ['**/*.svg', '**/*.png', '**/*.jp(e)?g', '**/*.gif', '**/*.webp', '**/*.gltf', '**/*.glb'],
+      }),
+      string({ include: ['**/*.glsl'] }),
       production && terser(),
       !production && livereload(),
       !production &&
-         serve({
-            contentBase: 'dist/dev',
-            port: 3000,
-            open: true,
-         }),
+      serve({
+         contentBase: 'dist/dev',
+         port: 3000,
+         open: true,
+      }),
    ],
 };

@@ -1,9 +1,10 @@
+import * as THREE from 'three';
 import './styles/styles.sass';
-import { ACESFilmicToneMapping, Clock, PerspectiveCamera, Scene, sRGBEncoding, WebGLRenderer } from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import { isMobile } from 'utils/constants';
-import { World } from 'content/world';
-import Stats from 'stats.js';
+import { createControls } from 'utils/controls';
+import { World } from 'content';
+import { gui } from 'utils';
+import { Clock, PerspectiveCamera, Scene, WebGLRenderer } from 'three';
 
 export class App {
    private camera: PerspectiveCamera;
@@ -11,41 +12,31 @@ export class App {
    private controls: OrbitControls;
    private scene: Scene;
    private clock: Clock;
-   private stats: Stats;
-
    private world: World;
 
    constructor() {
-      this.scene = new Scene();
+      this.renderer = new THREE.WebGLRenderer({
+         antialias: true,
+      });
+      this.scene = new THREE.Scene();
 
-      const aspectRatio = window.innerWidth / window.innerHeight;
-      this.camera = new PerspectiveCamera(45, aspectRatio, 0.5, isMobile ? 300 : 1000);
-      // this.camera.position.set(0, 20, 0);
-      this.camera.position.set(-17, 31, 33);
+      this.camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 1, 4000);
+      // this.camera.position.z = 35;
+      // this.camera.position.y = 200;
+      this.camera.position.set(-50, 61, 40);
 
-      this.renderer = new WebGLRenderer({ antialias: true });
+      this.controls = createControls(this.camera, this.renderer.domElement);
 
-      this.renderer.setSize(window.innerWidth, window.innerHeight);
-      this.renderer.setPixelRatio(window.devicePixelRatio);
-      this.renderer.toneMapping = ACESFilmicToneMapping;
-      this.renderer.outputEncoding = sRGBEncoding;
-      this.renderer.shadowMap.enabled = true;
-      document.body.appendChild(this.renderer.domElement);
-
-      this.controls = new OrbitControls(this.camera, this.renderer.domElement);
-      this.controls.target.set(0, 0, 0);
-      this.controls.dampingFactor = 0.05;
-      this.controls.enableDamping = true;
-
-      this.world = new World(this.scene);
+      this.world = new World(this.scene, this.camera);
       this.world.generate();
 
-      this.stats = new Stats();
-      document.body.appendChild(this.stats.dom);
-
+      this.renderer.setPixelRatio(window.devicePixelRatio);
+      this.renderer.setSize(window.innerWidth, window.innerHeight);
+      document.body.appendChild(this.renderer.domElement);
       window.addEventListener('resize', this.onWindowResize.bind(this), false);
 
-      this.clock = new Clock();
+      this.clock = new THREE.Clock();
+      this.initGui();
       this.render();
    }
 
@@ -58,11 +49,15 @@ export class App {
    private render() {
       requestAnimationFrame(this.render.bind(this));
       const time = this.clock.getElapsedTime();
-      this.stats.begin();
-      this.world.update(time);
       this.controls.update();
+      this.world.update(time);
+
       this.renderer.render(this.scene, this.camera);
-      this.stats.end();
+   }
+
+   private initGui() {
+      const folder = gui.getInstance();
+      folder.close();
    }
 }
 

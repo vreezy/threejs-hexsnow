@@ -1,96 +1,75 @@
 import {
    AmbientLight,
    Color,
-   DoubleSide,
+   Fog,
+   InstancedMesh,
+   MathUtils,
    Matrix4,
-   Mesh,
-   MeshBasicMaterial,
-   MeshNormalMaterial,
-   PlaneGeometry,
+   PerspectiveCamera,
    PointLight,
    Scene,
-   ShaderMaterial,
    Vector2,
 } from 'three';
-import { createNoise2D, NoiseFunction2D } from 'simplex-noise';
 
-import fragmentShader from '../shaders/fragment.glsl';
-import vertexShader from '../shaders/vertex.glsl';
-
-import { isMobile, MAX_HEIGHT, MAX_PILLARS, MAX_SPIKES, MAX_WORLD_RADIUS } from '../utils/constants';
-import { Hexagon, Pillar, Metal, Spikes, Pebbles, Rock, Ground } from 'content';
-import { textureLoader } from 'utils';
+import { generateNoise, gui } from 'utils';
+import { MAX_HEIGHT, MAX_WORLD_RADIUS } from 'utils/constants';
+import { getNoise } from 'utils/noise-generator';
+import { Particles } from './particles';
+import { Hexagon, HexagonType } from './hexagon';
+import { Skybox } from './skybox';
+import { Ice } from './ice';
+import { Trees } from './trees';
 
 export class World {
-   private heightMap: NoiseFunction2D;
+   private camera: PerspectiveCamera;
    private ambientLight: AmbientLight;
    private pointLight: PointLight;
+   private particles: Particles;
+   private hexagon: Hexagon;
+   private skybox: Skybox;
+   private trees: Trees;
+   private ice: Ice;
+   private fog: Fog;
    private scene: Scene;
 
-   private shaderMaterial: ShaderMaterial;
-
-   private pillars: Pillar;
-   private ground: Ground;
-   private pebbles: Pebbles;
-   private spikes: Spikes;
-   private metal: Metal;
-   private rock: Rock;
-
-   constructor(_scene: Scene) {
+   constructor(_scene: Scene, _camera: PerspectiveCamera) {
+      this.camera = _camera;
       this.scene = _scene;
-
-      const hexGeometry = Hexagon.createGeometry();
-      this.pillars = new Pillar(hexGeometry);
-      this.ground = new Ground(hexGeometry);
-      this.metal = new Metal(hexGeometry);
-      this.rock = new Rock(hexGeometry);
-      this.pebbles = new Pebbles();
-      this.spikes = new Spikes();
-
-      this.heightMap = createNoise2D();
    }
 
-   public generate() {
-      // this.shaderMaterial = new ShaderMaterial({
-      //    vertexShader: vertexShader,
-      //    fragmentShader: fragmentShader,
-      //    uniforms: {
-      //       uColor: { value: new Color(0xff0000) },
-      //       uTime: { value: 0 },
-      //    },
-      // });
+   public async generate() {
+      const heightMap = generateNoise(1000);
 
-      // const planeGeometry = new PlaneGeometry(10, 10);
-      // const plane = new Mesh(planeGeometry, this.shaderMaterial);
-      // plane.rotation.set(-Math.PI * 0.5, 0, 0);
-      // plane.position.set(-5, 0, 0);
-      // this.scene.add(plane);
+      this.particles = new Particles(this.camera);
+      this.hexagon = new Hexagon();
+      this.skybox = new Skybox();
+      this.ice = new Ice(heightMap);
+      this.trees = new Trees();
+      await this.trees.loadMesh();
 
-      // const hexGeometry = Hexagon.createGeometry();
-      // const hexagon = new Mesh(hexGeometry, this.shaderMaterial);
-      // hexagon.rotation.set(0, Math.PI * 0.5, 0);
-      // hexagon.position.set(5, 0, 0);
-      // hexagon.scale.set(5, 0.5, 5);
-      // this.scene.add(hexagon);
-      // return;
+      this.scene.background = this.skybox.cubeTexture;
+      this.scene.add(this.particles.points);
+      this.scene.add(this.trees.treeGroup);
+      this.scene.add(this.hexagon.mesh);
+      this.scene.add(this.ice.mesh);
 
-      this.scene.add(this.pillars.mesh);
-      this.scene.add(this.ground.mesh);
-      this.scene.add(this.metal.mesh);
-      this.scene.add(this.rock.mesh);
-      this.scene.add(this.spikes.mesh);
-      this.scene.add(this.pebbles.mesh);
-
-      this.createTiles();
       this.createLights();
+      this.createTiles();
+      this.createFog();
 
-      this.pillars.mesh.instanceMatrix.needsUpdate = true;
-      this.ground.mesh.instanceMatrix.needsUpdate = true;
-      this.metal.mesh.instanceMatrix.needsUpdate = true;
-      this.rock.mesh.instanceMatrix.needsUpdate = true;
-      this.pebbles.mesh.instanceMatrix.needsUpdate = true;
-      this.spikes.mesh.instanceMatrix.needsUpdate = true;
-      this.pointLight.shadow.needsUpdate = true;
+      this.trees.treeGroup.children.forEach((mesh: InstancedMesh) => {
+         mesh.instanceMatrix.needsUpdate = true;
+         if (mesh.instanceColor) {
+            mesh.instanceColor.needsUpdate = true;
+         }
+      });
+
+      this.initGui();
+   }
+
+   public update(time: number) {
+      this.particles.update(time);
+      this.ice.update(time);
    }
 
    private createTiles() {
@@ -105,57 +84,99 @@ export class World {
 
          do {
             const y = (yPositive + yNegative) % 2 === 0 ? yPositive++ : -yNegative++;
-            const position = Hexagon.getPosition(x, y);
-            if (position.length() < MAX_WORLD_RADIUS) {
-               let height = (this.heightMap(x * 0.075, y * 0.075) + 0.75) * 0.6;
-               height = Math.pow(height, 2.5) * MAX_HEIGHT + 0.25;
-               this.createTile(height, position, matrix);
+            const position = this.hexagon.getPosition(x, y);
+            let height = getNoise(position.x / 170, position.y / 170);
+            if (position.length() < MAX_WORLD_RADIUS && height > 0.22) {
+               height = Math.pow(height, 4.5) * MAX_HEIGHT;
+               this.addTile(height, position, matrix);
             }
-         } while (yPositive < 100 || yNegative < 100);
-      } while (xPositive < 100 || xNegative < 100);
+         } while (yPositive < MAX_WORLD_RADIUS || yNegative < MAX_WORLD_RADIUS);
+      } while (xPositive < MAX_WORLD_RADIUS || xNegative < MAX_WORLD_RADIUS);
    }
 
-   private createTile(height: number, position: Vector2, matrix: Matrix4) {
-      if (height > MAX_HEIGHT * 0.9) {
-         return;
-      } else if (height > MAX_HEIGHT * 0.895 && MAX_PILLARS > this.pillars.count) {
-         this.pillars.createTile(height, position, matrix);
-      } else if (height > MAX_HEIGHT * 0.5) {
-         this.metal.createTile(height, position, matrix);
-         if (Math.random() > 0.92 && MAX_SPIKES > this.spikes.count) {
-            this.spikes.createSpike(height, position, matrix);
+   private addTile(height: number, position: Vector2, matrix: Matrix4) {
+      let hexType: HexagonType;
+
+      if (MAX_HEIGHT * 0.52 < height || height < MAX_HEIGHT * 0.008) {
+         hexType = 'Snow';
+         if (height < MAX_HEIGHT * 0.005 && Math.random() > 0.99) {
+            this.trees.addTree('Snow', height, position, matrix);
          }
-      } else if (height > MAX_HEIGHT * 0.3) {
-         this.rock.createTile(height, position, matrix);
-         if (Math.random() > 0.985) {
-            this.pebbles.createRock(height, position, matrix);
-         }
+      } else if (MAX_HEIGHT * 0.48 < height || height < MAX_HEIGHT * 0.01) {
+         hexType = 'Grass';
       } else {
-         this.ground.createTile(height, position, matrix);
+         hexType = 'Ground';
+         if (Math.random() > 0.996) {
+            this.trees.addTree('Ground', height, position, matrix);
+         }
       }
+      this.hexagon.addTile(hexType, height, position, matrix);
    }
 
    private createLights() {
-      this.ambientLight = new AmbientLight(new Color(0xeca9f5), 0.1);
+      this.ambientLight = new AmbientLight(new Color(0xffffff), 0.3);
       this.scene.add(this.ambientLight);
 
-      this.pointLight = new PointLight(new Color(0xffffff).convertSRGBToLinear(), 1.5, 120);
-      this.pointLight.position.set(25, 65, 0);
-      if (!isMobile) {
-         this.pointLight.castShadow = true;
-         this.pointLight.shadow.mapSize.height = 512;
-         this.pointLight.shadow.mapSize.width = 512;
-         this.pointLight.shadow.autoUpdate = false;
-         this.pointLight.shadow.camera.near = 0.5;
-         this.pointLight.shadow.camera.far = 50;
-      }
-
+      this.pointLight = new PointLight(new Color(0xc2f8ff), 3, 500, 0.6);
+      this.pointLight.position.set(25, 100, 0);
       this.scene.add(this.pointLight);
    }
 
-   public update(time: number) {
-      // this.shaderMaterial.uniforms.uTime.value = time;
+   private createFog() {
+      this.fog = new Fog(new Color(0xffffff));
+      this.fog.near = 100;
+      this.fog.far = 400;
+      this.scene.fog = this.fog;
    }
 
-   private initGui() {}
+   private initGui() {
+      const fogFolder = gui.getInstance().addFolder('Fog');
+
+      fogFolder
+         .addColor(this.fog, 'color')
+         .onChange((value) => this.fog.color.set(new Color(value)))
+         .name('Color');
+
+      fogFolder
+         .add(this.fog, 'near', 0, 500, 0.1)
+         .onChange((value) => (this.fog.near = value))
+         .name('Near');
+
+      fogFolder
+         .add(this.fog, 'far', 0, 500, 0.1)
+         .onChange((value) => (this.fog.far = value))
+         .name('Far');
+
+      const lightFolder = gui.getInstance().addFolder('Lights');
+
+      lightFolder
+         .addColor(this.ambientLight, 'color')
+         .onChange((value) => this.ambientLight.color.set(new Color(value)))
+         .name('Ambient Light');
+
+      lightFolder
+         .add(this.ambientLight, 'intensity', 0, 1, 0.01)
+         .onChange((value) => (this.ambientLight.intensity = value))
+         .name('Ambient Intensity');
+
+      lightFolder
+         .addColor(this.pointLight, 'color')
+         .onChange((value) => this.pointLight.color.set(new Color(value)))
+         .name('Point Light');
+
+      lightFolder
+         .add(this.pointLight, 'distance', 0, 1000, 1.0)
+         .onChange((value) => (this.pointLight.distance = value))
+         .name('Point Distance');
+
+      lightFolder
+         .add(this.pointLight, 'intensity', 0, 10, 0.01)
+         .onChange((value) => (this.pointLight.intensity = value))
+         .name('Point Intensity');
+
+      lightFolder
+         .add(this.pointLight, 'decay', 0, 1, 0.01)
+         .onChange((value) => (this.pointLight.decay = value))
+         .name('Point Decay');
+   }
 }

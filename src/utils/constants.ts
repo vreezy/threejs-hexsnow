@@ -1,11 +1,7 @@
-import mobile from 'is-mobile';
+// import mobile from 'is-mobile';
 
-export const isMobile = mobile();
-export const MAX_WORLD_RADIUS = isMobile ? 45 : 90;
-export const MAX_PEBBLES = Math.floor(Math.pow(MAX_WORLD_RADIUS, 1.25));
-export const MAX_PILLARS = MAX_WORLD_RADIUS * 0.15;
-export const MAX_GROUND = MAX_WORLD_RADIUS * 25;
-export const MAX_SPIKES = MAX_WORLD_RADIUS * 4;
-export const MAX_ROCK = MAX_WORLD_RADIUS * 25;
-export const MAX_SAND = MAX_WORLD_RADIUS * 80;
-export const MAX_HEIGHT = 10;
+// export const isMobile = mobile();
+export const MAX_WORLD_RADIUS = 400;
+export const MAX_HEXAGONS = MAX_WORLD_RADIUS * 460;
+export const MAX_TREES = MAX_WORLD_RADIUS * 6;
+export const MAX_HEIGHT = 70;

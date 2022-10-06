@@ -1,9 +1,17 @@
 {
    "compilerOptions": {
-      "baseUrl": "./src",
-      "target": "ESNEXT",
+      "forceConsistentCasingInFileNames": true,
       "module": "commonjs",
       "skipLibCheck": true,
-      "forceConsistentCasingInFileNames": true
-   }
+      "baseUrl": "./src",
+      "target": "ESNEXT",
+      "allowJs": true
+   },
+   "include": [
+      "src/**/*"
+   ],
+   "exclude": [
+      "node_modules",
+      "dist/**"
+   ],
 }

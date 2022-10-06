@@ -29,3 +29,6 @@ The `public/index.html` file contains a `<script src='bundle.js'>` tag, which me
 
 \_Based on GrantBartlett's repo https://github.com/GrantBartlett/three-typescript-webpack-starter
 
+## License
+
+[MIT](LICENSE).
