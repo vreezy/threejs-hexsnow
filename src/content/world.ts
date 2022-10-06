@@ -11,14 +11,13 @@ import {
 } from 'three';
 
 import { generateNoise, gui } from 'utils';
-import { MAX_HEIGHT, MAX_WORLD_RADIUS } from 'utils/constants';
+import { isMobile, MAX_HEIGHT, MAX_WORLD_RADIUS } from 'utils/constants';
 import { getNoise } from 'utils/noise-generator';
 import { Particles } from './particles';
 import { Hexagon, HexagonType } from './hexagon';
 import { Skybox } from './skybox';
 import { Ice } from './ice';
 import { Trees } from './trees';
-import isMobile from 'is-mobile';
 
 export class World {
    private camera: PerspectiveCamera;
