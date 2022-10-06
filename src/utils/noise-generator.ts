@@ -1,4 +1,4 @@
-import { DataTexture, MirroredRepeatWrapping, RepeatWrapping } from 'three';
+import { DataTexture, MirroredRepeatWrapping } from 'three';
 import Alea from 'alea';
 import { createNoise2D } from 'simplex-noise';
 

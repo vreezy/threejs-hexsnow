@@ -1,12 +1,4 @@
-import {
-   BufferGeometry,
-   Color,
-   CylinderGeometry,
-   InstancedMesh,
-   Matrix4,
-   MeshStandardMaterial,
-   Vector2,
-} from 'three';
+import { Color, CylinderGeometry, InstancedMesh, Matrix4, MeshStandardMaterial, Vector2 } from 'three';
 import { gui } from 'utils';
 import { MAX_HEXAGONS } from 'utils/constants';
 

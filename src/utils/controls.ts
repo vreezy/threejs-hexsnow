@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { createLimitPan } from '@ocio/three-camera-utils';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { PerspectiveCamera } from 'three';
+import { MAX_WORLD_RADIUS } from './constants';
 
 export const createControls = (camera: PerspectiveCamera, canvas: HTMLCanvasElement) => {
    const controls = new OrbitControls(camera, canvas);
@@ -17,8 +18,9 @@ export const createControls = (camera: PerspectiveCamera, canvas: HTMLCanvasElem
 
    controls.target = new THREE.Vector3(0, 0.16, -2.6);
    const limitPan = createLimitPan({ camera, controls });
+   const maxPan = MAX_WORLD_RADIUS * 0.4;
    controls.addEventListener('change', (e) => {
-      limitPan({ minX: -165, maxX: 165, minY: 8, maxY: 35, minZ: -165, maxZ: 165 });
+      limitPan({ minX: -maxPan, maxX: maxPan, minY: 8, maxY: 35, minZ: -maxPan, maxZ: maxPan });
    });
 
    return controls;

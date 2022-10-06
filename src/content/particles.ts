@@ -1,7 +1,6 @@
 import {
    BufferGeometry,
    Color,
-   DoubleSide,
    Float32BufferAttribute,
    PerspectiveCamera,
    Points,
@@ -51,6 +50,8 @@ const fragmentShader = /*glsl*/ `
 `;
 
 export class Particles {
+   points: Points;
+
    private camera: PerspectiveCamera;
    private material: ShaderMaterial;
    private geometry: BufferGeometry;
@@ -59,8 +60,6 @@ export class Particles {
    private totalTime: number;
    private particles: any[];
    private uniforms: any;
-
-   points: Points;
 
    constructor(_camera: PerspectiveCamera) {
       this.camera = _camera;
@@ -94,8 +93,8 @@ export class Particles {
 
    private addParticles(time: number) {
       this.totalTime += time;
-      const n = Math.floor(this.totalTime * 400.0);
-      this.totalTime -= n / 400.0;
+      const n = Math.floor(this.totalTime * MAX_WORLD_RADIUS);
+      this.totalTime -= n / MAX_WORLD_RADIUS;
 
       for (let i = 0; i < n; i++) {
          const life = (Math.random() * 0.75 + 0.4) * 10.0;
@@ -105,7 +104,7 @@ export class Particles {
                (Math.random() + 0.15) * 100,
                (Math.random() - 0.5) * MAX_WORLD_RADIUS
             ),
-            velocity: new Vector3(0, (Math.random() + 0.25) * -6, 0),
+            velocity: new Vector3(0, (Math.random() + 0.25) * -4, 0),
             rotation: Math.random() * 2.0 * Math.PI,
             colour: new Color(0xffffff),
             size: Math.random() + 0.25,
@@ -196,11 +195,11 @@ export class Particles {
       this.uniforms = {
          uEmissiveColour: { value: new Color(0x1a9cff) },
          uColour: { value: new Color(0xffffff) },
-         uTexture: { value: new Texture() },
          uEmissiveIntensity: { value: 0.2 },
+         uTexture: { value: new Texture() },
          uTime: { value: 0 },
          uPointMultiplier: {
-            value: window.innerHeight / (2.0 * Math.tan((0.5 * 60.0 * Math.PI) / 180.0)),
+            value: window.innerHeight / (2.0 * Math.tan((0.5 * 100.0 * Math.PI) / 180.0)),
          },
       };
 
@@ -213,9 +212,8 @@ export class Particles {
          depthTest: true,
       });
 
-      textureLoader.loadAsync(iceTexture).then((value) => {
-         material.uniforms.uTexture.value = value;
-      });
+      textureLoader.loadAsync(iceTexture).then((value) => (material.uniforms.uTexture.value = value));
+
       return material;
    }
 

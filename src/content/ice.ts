@@ -2,11 +2,9 @@ import {
    CircleGeometry,
    Color,
    DataTexture,
-   DoubleSide,
    Mesh,
    MeshStandardMaterial,
    NearestMipmapLinearFilter,
-   PlaneGeometry,
    RepeatWrapping,
    Texture,
 } from 'three';

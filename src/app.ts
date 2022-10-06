@@ -5,6 +5,7 @@ import { createControls } from 'utils/controls';
 import { World } from 'content';
 import { gui } from 'utils';
 import { Clock, PerspectiveCamera, Scene, WebGLRenderer } from 'three';
+import { isMobile } from 'utils/constants';
 
 export class App {
    private camera: PerspectiveCamera;
@@ -15,14 +16,16 @@ export class App {
    private world: World;
 
    constructor() {
-      this.renderer = new THREE.WebGLRenderer({
-         antialias: true,
-      });
+      this.renderer = new THREE.WebGLRenderer({ antialias: true });
       this.scene = new THREE.Scene();
 
-      this.camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 1, 4000);
-      // this.camera.position.z = 35;
-      // this.camera.position.y = 200;
+      this.camera = new THREE.PerspectiveCamera(
+         70,
+         window.innerWidth / window.innerHeight,
+         1,
+         isMobile ? 400 : 1000
+      );
+
       this.camera.position.set(-50, 61, 40);
 
       this.controls = createControls(this.camera, this.renderer.domElement);
@@ -48,9 +51,8 @@ export class App {
 
    private render() {
       requestAnimationFrame(this.render.bind(this));
-      const time = this.clock.getElapsedTime();
       this.controls.update();
-      this.world.update(time);
+      this.world.update(this.clock.getElapsedTime());
 
       this.renderer.render(this.scene, this.camera);
    }

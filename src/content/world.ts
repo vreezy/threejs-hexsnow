@@ -3,7 +3,6 @@ import {
    Color,
    Fog,
    InstancedMesh,
-   MathUtils,
    Matrix4,
    PerspectiveCamera,
    PointLight,
@@ -27,10 +26,10 @@ export class World {
    private particles: Particles;
    private hexagon: Hexagon;
    private skybox: Skybox;
+   private scene: Scene;
    private trees: Trees;
    private ice: Ice;
    private fog: Fog;
-   private scene: Scene;
 
    constructor(_scene: Scene, _camera: PerspectiveCamera) {
       this.camera = _camera;

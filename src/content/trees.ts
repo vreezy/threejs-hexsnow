@@ -1,18 +1,12 @@
 import {
    BufferGeometry,
    Color,
-   CylinderGeometry,
    Group,
    InstancedMesh,
    MathUtils,
    Matrix4,
    Mesh,
-   MeshBasicMaterial,
-   MeshNormalMaterial,
    MeshStandardMaterial,
-   Object3D,
-   Scene,
-   Texture,
    Vector2,
 } from 'three';
 import { gltfLoader, gui } from 'utils';
@@ -22,6 +16,9 @@ import treeFile from '../assets/models/tree.glb';
 export type TreeType = 'Ground' | 'Snow';
 
 export class Trees {
+   treeGroup: Group;
+   count: number;
+
    private leafMaterial: MeshStandardMaterial;
    private leafGeometry: BufferGeometry;
    private leafMesh: InstancedMesh;
@@ -36,9 +33,6 @@ export class Trees {
 
    private groundColor: Color;
    private snowColor: Color;
-
-   treeGroup: Group;
-   count: number;
 
    constructor() {
       this.groundColor = new Color(0xffffff);

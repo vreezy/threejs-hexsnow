@@ -7,9 +7,10 @@
    "dependencies": {
       "@ocio/three-camera-utils": "^2.5.2",
       "alea": "^1.0.1",
+      "is-mobile": "^3.1.1",
       "lil-gui": "^0.17.0",
       "simplex-noise": "^4.0.0",
-      "three": "^0.143.0"
+      "three": "^0.145.0"
    },
    "devDependencies": {
       "@rollup/plugin-commonjs": "^17.0.0",
