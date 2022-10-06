@@ -11,7 +11,7 @@ import {
 } from 'three';
 
 import { generateNoise, gui } from 'utils';
-import { isMobile, MAX_HEIGHT, MAX_WORLD_RADIUS } from 'utils/constants';
+import { isDebug, isMobile, MAX_HEIGHT, MAX_WORLD_RADIUS } from 'utils/constants';
 import { getNoise } from 'utils/noise-generator';
 import { Particles } from './particles';
 import { Hexagon, HexagonType } from './hexagon';
@@ -129,7 +129,9 @@ export class World {
    }
 
    private initGui() {
-      const fogFolder = gui.getInstance().addFolder('Fog');
+      const lilGui = gui.getInstance();
+      isDebug && lilGui.domElement.classList.add('debug');
+      const fogFolder = lilGui.addFolder('Fog');
 
       fogFolder
          .addColor(this.fog, 'color')
@@ -146,8 +148,7 @@ export class World {
          .onChange((value) => (this.fog.far = value))
          .name('Far');
 
-      const lightFolder = gui.getInstance().addFolder('Lights');
-
+      const lightFolder = lilGui.addFolder('Lights');
       lightFolder
          .addColor(this.ambientLight, 'color')
          .onChange((value) => this.ambientLight.color.set(new Color(value)))
