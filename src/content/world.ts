@@ -123,8 +123,8 @@ export class World {
 
    private createFog() {
       this.fog = new Fog(new Color(0xffffff));
-      this.fog.near = isMobile ? 80 : 100;
-      this.fog.far = isMobile ? 320 : 400;
+      this.fog.near = 100;
+      this.fog.far = 400;
       this.scene.fog = this.fog;
    }
 
