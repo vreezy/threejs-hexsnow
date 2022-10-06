@@ -1,12 +1,11 @@
 import * as THREE from 'three';
 import './styles/styles.scss';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import { Clock, LinearMipMapLinearFilter, PerspectiveCamera, Scene, WebGLRenderer } from 'three';
+import { Clock, PerspectiveCamera, Scene, WebGLRenderer } from 'three';
 import { createControls } from 'utils/controls';
 import { isMobile } from 'utils/constants';
 import { debugGui } from 'utils';
 import { World } from 'content';
-// import UI from './content/ui.html';
 import { initAudio } from 'content/audio';
 
 export class App {
