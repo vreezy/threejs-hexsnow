@@ -7,6 +7,7 @@ import { string } from 'rollup-plugin-string';
 import serve from 'rollup-plugin-serve';
 import scss from 'rollup-plugin-scss';
 import html from '@rollup/plugin-html';
+import copy from 'rollup-plugin-copy'
 import url from '@rollup/plugin-url';
 
 const production = !process.env.ROLLUP_WATCH;
@@ -28,9 +29,13 @@ export default {
       typescript({ module: 'ESNext' }),
       url({
          fileName: 'assets/[name][extname]',
-         include: ['**/*.svg', '**/*.png', '**/*.jp(e)?g', '**/*.gif', '**/*.webp', '**/*.gltf', '**/*.glb'],
+         include: ['**/*.svg', '**/*.png', '**/*.jp(e)?g', '**/*.gif', '**/*.webp',
+            '**/*.gltf', '**/*.glb', '**/*.mp3', '**/*.wav'],
       }),
-      string({ include: ['**/*.glsl'] }),
+      copy({
+         targets: [{ src: 'public/**', dest: `dist/${directory}/assets` }]
+      }),
+      string({ include: ['**/*.glsl', '**/*.html'] }),
       production && terser(),
       !production && livereload(),
       !production &&

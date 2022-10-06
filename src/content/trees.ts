@@ -9,7 +9,7 @@ import {
    MeshStandardMaterial,
    Vector2,
 } from 'three';
-import { gltfLoader, gui } from 'utils';
+import { gltfLoader, debugGui } from 'utils';
 import { MAX_TREES } from 'utils/constants';
 import treeFile from '../assets/models/tree.glb';
 
@@ -41,7 +41,7 @@ export class Trees {
 
       this.count = 0;
 
-      this.initGui();
+      this.initDebugUI();
    }
 
    public addTree(type: TreeType, height: number, position: Vector2, matrix: Matrix4) {
@@ -87,7 +87,7 @@ export class Trees {
       this.treeGroup.add(this.trunkMesh);
    }
 
-   private initGui() {
+   private initDebugUI() {
       // const folder = gui.getInstance().addFolder('Trees');
    }
 }

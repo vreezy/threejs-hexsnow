@@ -4,3 +4,6 @@ declare module '*.jpg';
 declare module '*.glsl';
 declare module '*.glb';
 declare module '*.gltf';
+declare module '*.html';
+declare module '*.mp3';
+declare module '*.wav';

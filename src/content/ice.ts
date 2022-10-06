@@ -9,7 +9,7 @@ import {
    Texture,
 } from 'three';
 
-import { gui, textureLoader, injectShader, InjectShaderProps } from 'utils';
+import { textureLoader, injectShader, InjectShaderProps, debugGui } from 'utils';
 import { MAX_WORLD_RADIUS } from 'utils/constants';
 import iceTexture from '../assets/ice.jpg';
 
@@ -51,7 +51,7 @@ export class Ice {
       this.mesh.rotation.set(-Math.PI * 0.5, 0, 0);
       this.mesh.position.set(0, -0.25, 0);
 
-      this.initGui();
+      this.initDebugUI();
    }
 
    public update(time: number) {
@@ -74,12 +74,12 @@ export class Ice {
       };
 
       const material = new MeshStandardMaterial({
-         color: new Color(0xffffff),
-         emissive: new Color(0x000000),
-         emissiveIntensity: 0.0,
+         emissive: new Color(0x90fcfe),
+         color: new Color(0x90fcfe),
+         emissiveIntensity: 0.1,
          map: new Texture(),
-         metalness: 1,
-         roughness: 0.82,
+         metalness: 0.5,
+         roughness: 0.8,
       });
 
       const shaderInjections: InjectShaderProps[] = [
@@ -109,23 +109,8 @@ export class Ice {
       return material;
    }
 
-   private initGui() {
-      const folder = gui.getInstance().addFolder('Ice');
-
-      folder
-         .add(this.mesh.position, 'x', -400, 400)
-         .onChange((value) => (this.mesh.position.x = value))
-         .name('Position X');
-
-      folder
-         .add(this.mesh.position, 'y', -400, 400)
-         .onChange((value) => (this.mesh.position.y = value))
-         .name('Position Y');
-
-      folder
-         .add(this.mesh.position, 'z', -400, 400)
-         .onChange((value) => (this.mesh.position.z = value))
-         .name('Position Z');
+   private initDebugUI() {
+      const folder = debugGui.getInstance().addFolder('Ice');
 
       folder
          .addColor(this.material, 'color')

@@ -11,9 +11,9 @@ import {
 
 import iceTexture from '../assets/snowflake.png';
 
-import { gui, textureLoader } from 'utils';
+import { debugGui, textureLoader } from 'utils';
 import { Spline } from 'utils/spline';
-import { isMobile, MAX_WORLD_RADIUS } from 'utils/constants';
+import { isMobile, MAX_WORLD_RADIUS, MAX_PARTICLES } from 'utils/constants';
 
 const vertexShader = /*glsl*/ `
    attribute vec4 colour;
@@ -80,7 +80,7 @@ export class Particles {
 
       this.updateGeometry();
 
-      this.initGui();
+      this.initDebugUI();
    }
 
    public update(time: number) {
@@ -93,18 +93,18 @@ export class Particles {
 
    private addParticles(time: number) {
       this.totalTime += time;
-      const n = Math.floor(this.totalTime * MAX_WORLD_RADIUS);
-      this.totalTime -= n / MAX_WORLD_RADIUS;
+      const n = Math.floor(this.totalTime * MAX_PARTICLES);
+      this.totalTime -= n / MAX_PARTICLES;
 
       for (let i = 0; i < n; i++) {
          const life = (Math.random() * 0.75 + 0.4) * 10.0;
          this.particles.push({
             position: new Vector3(
                (Math.random() - 0.5) * MAX_WORLD_RADIUS,
-               (Math.random() + 0.15) * 100,
+               (Math.random() + 0.4) * 50,
                (Math.random() - 0.5) * MAX_WORLD_RADIUS
             ),
-            velocity: new Vector3(0, (Math.random() + 0.25) * -4, 0),
+            velocity: new Vector3((Math.random() + 0.25) * 25, (Math.random() + 0.25) * -6, 0),
             rotation: Math.random() * 2.0 * Math.PI,
             colour: new Color(0xffffff),
             size: Math.random() + 0.25,
@@ -218,8 +218,8 @@ export class Particles {
       return material;
    }
 
-   private initGui() {
-      const folder = gui.getInstance().addFolder('Particles');
+   private initDebugUI() {
+      const folder = debugGui.getInstance().addFolder('Particles');
 
       folder
          .addColor(this.uniforms.uColour, 'value')

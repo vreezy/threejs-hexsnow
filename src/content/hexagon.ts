@@ -1,5 +1,5 @@
 import { Color, CylinderGeometry, InstancedMesh, Matrix4, MeshStandardMaterial, Vector2 } from 'three';
-import { gui } from 'utils';
+import { debugGui } from 'utils';
 import { MAX_HEXAGONS } from 'utils/constants';
 
 export type HexagonType = 'Ground' | 'Snow' | 'Grass';
@@ -28,7 +28,7 @@ export class Hexagon {
       this.material = this.createMaterial(this.metalness, this.roughness);
       this.mesh = this.createMesh(this.geometry, this.material);
 
-      this.initGui();
+      this.initDebugUI();
    }
 
    public getPosition(tileX: number, tileY: number) {
@@ -70,8 +70,8 @@ export class Hexagon {
       return material;
    }
 
-   private initGui() {
-      const folder = gui.getInstance().addFolder('Hexagon');
+   private initDebugUI() {
+      const folder = debugGui.getInstance().addFolder('Hexagon');
       folder
          .addColor(this, 'groundColor')
          .onChange((value) => this.material.color.set(new Color(value)))

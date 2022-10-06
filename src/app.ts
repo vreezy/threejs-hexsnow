@@ -1,11 +1,13 @@
 import * as THREE from 'three';
-import './styles/styles.sass';
+import './styles/styles.scss';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import { createControls } from 'utils/controls';
-import { World } from 'content';
-import { gui } from 'utils';
 import { Clock, PerspectiveCamera, Scene, WebGLRenderer } from 'three';
+import { createControls } from 'utils/controls';
 import { isMobile } from 'utils/constants';
+import { debugGui } from 'utils';
+import { World } from 'content';
+import UI from './content/ui.html';
+import { initAudio } from 'content/audio';
 
 export class App {
    private camera: PerspectiveCamera;
@@ -19,13 +21,8 @@ export class App {
       this.renderer = new THREE.WebGLRenderer({ antialias: true });
       this.scene = new THREE.Scene();
 
-      this.camera = new THREE.PerspectiveCamera(
-         70,
-         window.innerWidth / window.innerHeight,
-         1,
-         isMobile ? 400 : 1000
-      );
-
+      const farPlane = isMobile ? 400 : 1000;
+      this.camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 1, farPlane);
       this.camera.position.set(-50, 61, 40);
 
       this.controls = createControls(this.camera, this.renderer.domElement);
@@ -37,9 +34,10 @@ export class App {
       this.renderer.setSize(window.innerWidth, window.innerHeight);
       document.body.appendChild(this.renderer.domElement);
       window.addEventListener('resize', this.onWindowResize.bind(this), false);
-
+      this.initUI();
+      this.initDebugUI();
+      initAudio(this.renderer.domElement);
       this.clock = new THREE.Clock();
-      this.initGui();
       this.render();
    }
 
@@ -53,12 +51,17 @@ export class App {
       requestAnimationFrame(this.render.bind(this));
       this.controls.update();
       this.world.update(this.clock.getElapsedTime());
-
       this.renderer.render(this.scene, this.camera);
    }
 
-   private initGui() {
-      const folder = gui.getInstance();
+   private initUI() {
+      const uiElement = document.createElement('div');
+      uiElement.innerHTML = UI;
+      document.body.appendChild(uiElement);
+   }
+
+   private initDebugUI() {
+      const folder = debugGui.getInstance();
       folder.close();
    }
 }

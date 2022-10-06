@@ -10,7 +10,7 @@ import {
    Vector2,
 } from 'three';
 
-import { generateNoise, gui } from 'utils';
+import { generateNoise, debugGui } from 'utils';
 import { isDebug, isMobile, MAX_HEIGHT, MAX_WORLD_RADIUS } from 'utils/constants';
 import { getNoise } from 'utils/noise-generator';
 import { Particles } from './particles';
@@ -63,7 +63,7 @@ export class World {
          }
       });
 
-      this.initGui();
+      this.initDebugUI();
    }
 
    public update(time: number) {
@@ -116,7 +116,7 @@ export class World {
       this.ambientLight = new AmbientLight(new Color(0xffffff), 0.3);
       this.scene.add(this.ambientLight);
 
-      this.pointLight = new PointLight(new Color(0xc2f8ff), 3, 500, 0.6);
+      this.pointLight = new PointLight(new Color(0xffd4cc), 3.0, 300, 0.4);
       this.pointLight.position.set(25, 100, 0);
       this.scene.add(this.pointLight);
    }
@@ -128,10 +128,8 @@ export class World {
       this.scene.fog = this.fog;
    }
 
-   private initGui() {
-      const lilGui = gui.getInstance();
-      isDebug && lilGui.domElement.classList.add('debug');
-      const fogFolder = lilGui.addFolder('Fog');
+   private initDebugUI() {
+      const fogFolder = debugGui.getInstance().addFolder('Fog');
 
       fogFolder
          .addColor(this.fog, 'color')
@@ -148,7 +146,7 @@ export class World {
          .onChange((value) => (this.fog.far = value))
          .name('Far');
 
-      const lightFolder = lilGui.addFolder('Lights');
+      const lightFolder = debugGui.getInstance().addFolder('Lights');
       lightFolder
          .addColor(this.ambientLight, 'color')
          .onChange((value) => this.ambientLight.color.set(new Color(value)))
