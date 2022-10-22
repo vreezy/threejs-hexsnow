@@ -31,6 +31,10 @@ export class World {
    private ice: Ice;
    private fog: Fog;
 
+   private logArray: any[];
+   private logHeights: any[];
+   private logHeights2: any[];
+
    constructor(_scene: Scene, _camera: PerspectiveCamera) {
       this.camera = _camera;
       this.scene = _scene;
@@ -52,9 +56,19 @@ export class World {
       this.scene.add(this.hexagon.mesh);
       this.scene.add(this.ice.mesh);
 
+      this.logArray = [];
+      this.logHeights = [];
+      this.logHeights2 = [];
+      
+
       this.createLights();
       this.createTiles();
       this.createFog();
+
+
+      console.log(this.logArray)
+      console.log(this.logHeights)
+      console.log(this.logHeights2)
 
       this.trees.treeGroup.children.forEach((mesh: InstancedMesh) => {
          mesh.instanceMatrix.needsUpdate = true;
@@ -83,10 +97,15 @@ export class World {
 
          do {
             const y = (yPositive + yNegative) % 2 === 0 ? yPositive++ : -yNegative++;
+
+            this.logArray.push(`${x}, ${y}`)
             const position = this.hexagon.getPosition(x, y);
             let height = getNoise(position.x / 170, position.y / 170);
+
+            this.logHeights.push(height)
             if (position.length() < MAX_WORLD_RADIUS && height > 0.22) {
                height = Math.pow(height, 4.5) * MAX_HEIGHT;
+               this.logHeights2.push(height)
                this.addTile(height, position, matrix);
             }
          } while (yPositive < MAX_WORLD_RADIUS || yNegative < MAX_WORLD_RADIUS);
